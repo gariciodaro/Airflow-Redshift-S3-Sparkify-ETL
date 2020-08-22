@@ -8,20 +8,23 @@ They have decided to bring you into the project and expect you to create high gr
 The source data resides in S3 and needs to be processed in Sparkify's data warehouse in Amazon Redshift. The source datasets consist of JSON logs that tell about user activity in the application and JSON metadata about the songs the users listen to.
 
 ```
-├── create_tables.sql
+├── dag.png
 ├── dags
-│   └── udac_example_dag.py
-└── plugins
-    ├── helpers
-    │   ├── __init__.py
-    │   └── sql_queries.py
-    ├── __init__.py
-    └── operators
-        ├── data_quality.py
-        ├── __init__.py
-        ├── load_dimension.py
-        ├── load_fact.py
-        └── stage_redshift.py
+│   ├── create_tables_dag.py
+│   └── etl_dag.py
+├── plugins
+│   ├── helpers
+│   │   ├── __init__.py
+│   │   └── sql_queries.py
+│   ├── __init__.py
+│   └── operators
+│       ├── data_quality.py
+│       ├── __init__.py
+│       ├── load_dimension.py
+│       ├── load_fact.py
+│       └── stage_redshift.py
+└── README.md
+
 ```
 
 <div>
