@@ -16,7 +16,7 @@ application and JSON metadata about the songs the users listen to.
 This project uses custom airflow operators to load once an hour data from
 S3 to the stagging area of Redshift. This process was done already on a ad hoc manner
 for project 3 of the nano degree of data engineering. Please visit that project repository
-for more information ([https://github.com/gariciodaro/redshift-Sparkify-data-warehouse](Data warehouse Sparkify on AWS Redshift.))
+for more information [https://github.com/gariciodaro/redshift-Sparkify-data-warehouse](Data warehouse Sparkify on AWS Redshift.)
 
 
 ## directed acyclic graphs (DAG) in AirFlow.
