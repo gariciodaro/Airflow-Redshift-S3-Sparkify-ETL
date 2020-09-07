@@ -14,6 +14,7 @@ from airflow.utils.decorators import apply_defaults
 
 class StageToRedshiftOperator(BaseOperator):
     ui_color = '#358140'
+    truncate_sql="TRUNCATE TABLE {};"
     copy_sql = ("""
     COPY {} FROM '{}'
     format as json '{}'
@@ -27,12 +28,10 @@ class StageToRedshiftOperator(BaseOperator):
                  table,
                  redshift_conn_id,
                  s3_path,
-                 access_key,
-                 secret_key,
+                 credentials,
                  s3_json_option='auto',
                  *args, **kwargs):
         """ Operator constructor
-
         Parameters
         ----------
         table : string
@@ -48,12 +47,17 @@ class StageToRedshiftOperator(BaseOperator):
         super(StageToRedshiftOperator, self).__init__(*args, **kwargs)
         self.table=table
         self.redshift_conn_id = redshift_conn_id
-        self.aws_access_key= access_key
-        self.aws_secret_key= secret_key
+        self.aws_access_key=credentials.access_key
+        self.aws_secret_key=credentials.secret_key
         self.s3_path = s3_path
         self.s3_json_option = s3_json_option
 
     def execute(self, context):
+        redshift_hook = PostgresHook(postgres_conn_id=self.redshift_conn_id)
+        
+        
+        self.log.info('StageToRedshiftOperator. truncating {} '.format(self.table))
+        redshift_hook.run(StageToRedshiftOperator.truncate_sql.format(self.table))
         
         self.log.info('StageToRedshiftOperator. Staging {} '.format(self.table))
         execute_q=StageToRedshiftOperator.copy_sql.format(self.table,
@@ -62,5 +66,4 @@ class StageToRedshiftOperator(BaseOperator):
                                                           self.aws_access_key,
                                                           self.aws_secret_key)
         self.log.info(execute_q)
-        redshift_hook = PostgresHook(postgres_conn_id=self.redshift_conn_id)
         redshift_hook.run(execute_q)

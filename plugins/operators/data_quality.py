@@ -17,9 +17,9 @@ class DataQualityOperator(BaseOperator):
     def __init__(self,
                  table_list,
                  redshift_conn_id,
+                 dq_checks,
                  *args, **kwargs):
         """ Operator constructor
-
         Parameters
         ----------
         table_list : list
@@ -30,18 +30,17 @@ class DataQualityOperator(BaseOperator):
         super(DataQualityOperator, self).__init__(*args, **kwargs)
         self.table_list = table_list
         self.redshift_conn_id = redshift_conn_id
+        self.dq_checks = dq_checks
 
     def execute(self, context):
         redshift_hook = PostgresHook(postgres_conn_id = self.redshift_conn_id)
 
         for table in self.table_list:
-            self.log.info(f'Begin data quality on table: {table} ')
-
-            records = redshift_hook.get_records(f"SELECT COUNT(*) FROM {table}")
-            if len(records) < 1 or len(records[0]) < 1:
-                raise ValueError(f"Quality check failed. No records for {table}")
-            num_records = records[0][0]
-            if num_records < 1:
-                raise ValueError(f"Quality check failed. {table} had 0 rows")
-            logging.info(
-                f"Quality check passed. {table} has with {records[0][0]} records")
+            for check in self.dq_checks:
+                sql = check.get('check_sql')
+                exp_result = check.get('expected_result')
+                self.log.info(f'Begin data quality on table: {table} ')
+                result = redshift_hook.get_records(sql.format(table))[0][0]
+                if eval(exp_result):
+                    raise ValueError(f"Quality check failed. {table}. test: {exp_result}")
+                logging.info(f"Quality check passed. {table} has {result} records")
